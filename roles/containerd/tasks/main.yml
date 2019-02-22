@@ -1,0 +1,48 @@
+- name: 准备containerd相关目录
+  file: name={{ item }} state=directory
+  with_items:
+  - "{{ bin_dir }}"
+  - /etc/containerd
+
+- name: 下载 containerd 二进制文件
+  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  with_items:
+  - containerd
+  - containerd-shim
+  - ctr
+  - runc
+  - crictl
+  tags: upgrade_containerd, download_containerd
+
+- name: 国内镜像加速
+  template: src=config.toml.j2 dest=/etc/containerd/config.toml
+
+- name: crictl配置
+  template: src=crictl.yaml.j2 dest=/etc/crictl.yaml
+
+- name: flush-iptables
+  shell: "iptables -P INPUT ACCEPT \
+        && iptables -F && iptables -X \
+        && iptables -F -t nat && iptables -X -t nat \
+        && iptables -F -t raw && iptables -X -t raw \
+        && iptables -F -t mangle && iptables -X -t mangle"
+
+- name: 创建containerd的systemd unit文件
+  template: src=containerd.service.j2 dest=/etc/systemd/system/containerd.service
+  tags: upgrade_containerd, download_containerd
+
+- name: 开机启用containerd 服务
+  shell: systemctl enable containerd
+  ignore_errors: true
+
+- name: 开启containerd服务
+  shell: systemctl daemon-reload && systemctl restart containerd
+  tags: upgrade_containerd
+
+- name: 轮询等待containerd服务运行
+  shell: "systemctl status containerd.service|grep Active"
+  register: containerd_status
+  until: '"running" in containerd_status.stdout'
+  retries: 8
+  delay: 2
+  tags: upgrade_containerd
