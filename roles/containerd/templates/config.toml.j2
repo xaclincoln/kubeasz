@@ -1,5 +1,11 @@
-[plugins.cri.registry.mirrors]
-  [plugins.cri.registry.mirrors."reg1.io"]
-    endpoint = ["{{ REG_MIRROR_1 }}"]
-    [plugins.cri.registry.mirrors."reg2.io"]
-    endpoint = ["{{ REG_MIRROR_2 }}"]
+[plugins.cri]
+  sandbox_image = "mirrorgooglecontainers/pause:3.1"
+  [plugins.cri.cni]
+    bin_dir = "/opt/cni/bin"
+    conf_dir = "{{ bin_dir }}"
+    conf_template = ""
+  [plugins.cri.registry.mirrors]
+    [plugins.cri.registry.mirrors."reg1.io"]
+      endpoint = ["{{ REG_MIRROR_1 }}"]
+      [plugins.cri.registry.mirrors."reg2.io"]
+      endpoint = ["{{ REG_MIRROR_2 }}"]

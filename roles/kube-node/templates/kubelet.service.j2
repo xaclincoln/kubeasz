@@ -1,8 +1,8 @@
 [Unit]
 Description=Kubernetes Kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-After=docker.service
-Requires=docker.service
+After=containerd.service
+Requires=containerd.service
 
 [Service]
 WorkingDirectory=/var/lib/kubelet

@@ -5,7 +5,7 @@
   - /etc/containerd
 
 - name: 下载 containerd 二进制文件
-  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  copy: src={{ base_dir }}/bin/{{ item }} dest=/usr/bin/{{ item }} mode=0755
   with_items:
   - containerd
   - containerd-shim
@@ -14,7 +14,7 @@
   - crictl
   tags: upgrade_containerd, download_containerd
 
-- name: 国内镜像加速
+- name: contaierd配置
   template: src=config.toml.j2 dest=/etc/containerd/config.toml
 
 - name: crictl配置
